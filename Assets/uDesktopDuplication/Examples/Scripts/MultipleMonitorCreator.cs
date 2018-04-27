@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Assertions;
-using System.Collections.Generic;
 using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
-using DuplicatorState = uDesktopDuplication.DuplicatorState;
+using MonitorState = uDesktopDuplication.DuplicatorState;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
-    [Tooltip("Create monitors using this prefab.")]
+    [Tooltip ("Create monitors using this prefab.")]
     public GameObject monitorPrefab;
 
     public enum ScaleMode
@@ -16,22 +16,22 @@ public class MultipleMonitorCreator : MonoBehaviour
         Pixel,
     }
 
-    [Tooltip("Real: DPI-based real scale \nFixed: Same width \nPixel: bigger if screen resolution is high.")]
+    [Tooltip ("Real: DPI-based real scale \nFixed: Same width \nPixel: bigger if screen resolution is high.")]
     public ScaleMode scaleMode = ScaleMode.Fixed;
 
-    [Tooltip("Use this scale as width if scaleMode is Fixed.")]
+    [Tooltip ("Use this scale as width if scaleMode is Fixed.")]
     public float scale = 0.5f;
 
-    [Tooltip("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
+    [Tooltip ("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
     public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
 
-    [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
+    [Tooltip ("Remove unsupported monitors automatically after removeWaitDuration.")]
     public bool removeIfUnsupported = true;
 
-    [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
+    [Tooltip ("Remove unsupported monitors automatically after removeWaitDuration.")]
     public float removeWaitDuration = 5f;
 
-    [Tooltip("Remove all childrens (for debug).")]
+    [Tooltip ("Remove all childrens (for debug).")]
     public bool removeChildrenWhenClear = true;
 
     bool hasMonitorUnsupportStateChecked_ = false;
@@ -39,15 +39,41 @@ public class MultipleMonitorCreator : MonoBehaviour
 
     public class MonitorInfo
     {
-        public GameObject gameObject { get; set; }
-        public Quaternion originalRotation { get; set; }
-        public Vector3 originalLocalScale { get; set; }
-        public uDesktopDuplication.Texture uddTexture { get; set; }
-        public Mesh mesh { get; set; }
+        public GameObject gameObject
+        {
+            get;
+            set;
+        }
+        public Quaternion originalRotation
+        {
+            get;
+            set;
+        }
+        public Vector3 originalLocalScale
+        {
+            get;
+            set;
+        }
+        public uDesktopDuplication.Texture uddTexture
+        {
+            get;
+            set;
+        }
+        public Mesh mesh
+        {
+            get;
+            set;
+        }
     }
 
-    private List<MonitorInfo> monitors_ = new List<MonitorInfo>();
-    public List<MonitorInfo> monitors { get { return monitors_; } }
+    private List<MonitorInfo> monitors_ = new List<MonitorInfo> ();
+    public List<MonitorInfo> monitors
+    {
+        get
+        {
+            return monitors_;
+        }
+    }
 
     public class SavedMonitorInfo
     {
@@ -55,91 +81,106 @@ public class MultipleMonitorCreator : MonoBehaviour
         public float heightScale = 1f;
     }
 
-    private List<SavedMonitorInfo> savedInfoList_ = new List<SavedMonitorInfo>();
-    public List<SavedMonitorInfo> savedInfoList { get { return savedInfoList_; } }
-
-    void Start()
+    private List<SavedMonitorInfo> savedInfoList_ = new List<SavedMonitorInfo> ();
+    public List<SavedMonitorInfo> savedInfoList
     {
-        uDesktopDuplication.Manager.CreateInstance();
-        Create();
-    }
-
-    void Update()
-    {
-        if (removeIfUnsupported) {
-            RemoveUnsupportedDisplayAfterRemoveTimer();
-        }
-
-        if (uDesktopDuplication.Manager.monitorCount != monitors.Count) {
-            Recreate();
+        get
+        {
+            return savedInfoList_;
         }
     }
 
-    void OnEnable()
+    void Start ()
+    {
+        uDesktopDuplication.Manager.CreateInstance ();
+        Create ();
+    }
+
+    void Update ()
+    {
+        if (removeIfUnsupported)
+        {
+            RemoveUnsupportedDisplayAfterRemoveTimer ();
+        }
+
+        if (uDesktopDuplication.Manager.monitorCount != monitors.Count)
+        {
+            Recreate ();
+        }
+    }
+
+    void OnEnable ()
     {
         uDesktopDuplication.Manager.onReinitialized += Recreate;
     }
 
-    void OnDisable()
+    void OnDisable ()
     {
         uDesktopDuplication.Manager.onReinitialized -= Recreate;
     }
 
-    void RemoveUnsupportedDisplayAfterRemoveTimer()
+    void RemoveUnsupportedDisplayAfterRemoveTimer ()
     {
-        if (!hasMonitorUnsupportStateChecked_) {
+        if (!hasMonitorUnsupportStateChecked_)
+        {
             removeWaitTimer_ += Time.deltaTime;
-            if (removeWaitTimer_ > removeWaitDuration) {
+            if (removeWaitTimer_ > removeWaitDuration)
+            {
                 hasMonitorUnsupportStateChecked_ = true;
-                foreach (var info in monitors) {
-                    if (info.uddTexture.monitor.state == DuplicatorState.Unsupported) {
-                        Destroy(info.gameObject);
+                foreach (var info in monitors)
+                {
+                    if (info.uddTexture.monitor.state == MonitorState.Unsupported)
+                    {
+                        Destroy (info.gameObject);
                     }
                 }
-                monitors.RemoveAll(info => info.uddTexture.monitor.state == DuplicatorState.Unsupported);
+                monitors.RemoveAll (info => info.uddTexture.monitor.state == MonitorState.Unsupported);
             }
         }
     }
 
-    void ResetRemoveTimer()
+    void ResetRemoveTimer ()
     {
         hasMonitorUnsupportStateChecked_ = false;
         removeWaitTimer_ = 0f;
     }
 
-    void Create()
+    void Create ()
     {
-        ResetRemoveTimer();
+        ResetRemoveTimer ();
 
         // Create monitors
         var n = uDesktopDuplication.Manager.monitors.Count;
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < n; ++i)
+        {
             // Create monitor obeject
-            var go = Instantiate(monitorPrefab);
+            var go = Instantiate (monitorPrefab);
             go.name = uDesktopDuplication.Manager.monitors[i].name;
 
             // Saved infomation
-            if (savedInfoList.Count == i) {
-                savedInfoList.Add(new SavedMonitorInfo());
-                Assert.AreEqual(i, savedInfoList.Count - 1);
+            if (savedInfoList.Count == i)
+            {
+                savedInfoList.Add (new SavedMonitorInfo ());
+                Assert.AreEqual (i, savedInfoList.Count - 1);
             }
             var savedInfo = savedInfoList[i];
 
             // Expand AABB
-            var mesh = go.GetComponent<MeshFilter>().mesh; // clone
+            var mesh = go.GetComponent<MeshFilter> ().mesh; // clone
             var aabbScale = mesh.bounds.size;
-            aabbScale.y = Mathf.Max(aabbScale.y, aabbScale.x);
-            aabbScale.z = Mathf.Max(aabbScale.z, aabbScale.x);
-            mesh.bounds = new Bounds(mesh.bounds.center, aabbScale);
+            aabbScale.y = Mathf.Max (aabbScale.y, aabbScale.x);
+            aabbScale.z = Mathf.Max (aabbScale.z, aabbScale.x);
+            mesh.bounds = new Bounds (mesh.bounds.center, aabbScale);
 
             // Assign monitor
-            var texture = go.GetComponent<uDesktopDuplication.Texture>();
+            var texture = go.GetComponent<uDesktopDuplication.Texture> ();
             texture.monitorId = i;
             var monitor = texture.monitor;
 
             // Set width / height
             float width = 1f, height = 1f;
-            switch (scaleMode) {
+            switch (scaleMode)
+            {
                 case ScaleMode.Real:
                     width = monitor.widthMeter;
                     height = monitor.heightMeter;
@@ -149,55 +190,60 @@ public class MultipleMonitorCreator : MonoBehaviour
                     height = scale * (monitor.isHorizontal ? 1f : 1f / monitor.aspect);
                     break;
                 case ScaleMode.Pixel:
-                    width = scale * (monitor.isHorizontal ? 1f : monitor.aspect) * ((float)monitor.width / 1920);
-                    height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f) * ((float)monitor.width / 1920);
+                    width = scale * (monitor.isHorizontal ? 1f : monitor.aspect) * ((float) monitor.width / 1920);
+                    height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f) * ((float) monitor.width / 1920);
                     break;
             }
 
             width *= savedInfo.widthScale;
             height *= savedInfo.heightScale;
 
-            if (meshForwardDirection == MeshForwardDirection.Y) {
-                go.transform.localScale = new Vector3(width, go.transform.localScale.y, height);
-            } else {
-                go.transform.localScale = new Vector3(width, height, go.transform.localScale.z);
+            if (meshForwardDirection == MeshForwardDirection.Y)
+            {
+                go.transform.localScale = new Vector3 (width, go.transform.localScale.y, height);
+            }
+            else
+            {
+                go.transform.localScale = new Vector3 (width, height, go.transform.localScale.z);
             }
 
             // Set parent as this object
-            go.transform.SetParent(transform);
+            go.transform.SetParent (transform);
 
             // Save
-            var info = new MonitorInfo();
+            var info = new MonitorInfo ();
             info.gameObject = go;
             info.originalRotation = go.transform.rotation;
             info.originalLocalScale = go.transform.localScale;
             info.uddTexture = texture;
             info.mesh = mesh;
-            monitors.Add(info);
+            monitors.Add (info);
         }
 
         // Sort monitors in coordinate order
-        monitors.Sort((a, b) => a.uddTexture.monitor.left - b.uddTexture.monitor.left);
+        monitors.Sort ((a, b) => a.uddTexture.monitor.left - b.uddTexture.monitor.left);
     }
 
-    void Clear()
+    void Clear ()
     {
-        foreach (var info in monitors) {
-            Destroy(info.gameObject);
+        foreach (var info in monitors)
+        {
+            Destroy (info.gameObject);
         }
-        if (removeChildrenWhenClear) {
-            for (int i = 0; i < transform.childCount; ++i) {
-                Destroy(transform.GetChild(i).gameObject);
+        if (removeChildrenWhenClear)
+        {
+            for (int i = 0; i < transform.childCount; ++i)
+            {
+                Destroy (transform.GetChild (i).gameObject);
             }
         }
-        monitors.Clear();
+        monitors.Clear ();
     }
 
-    [ContextMenu("Recreate")]
-    public void Recreate()
+    [ContextMenu ("Recreate")]
+    public void Recreate ()
     {
-        Clear();
-        Create();
+        Clear ();
+        Create ();
     }
 }
-
