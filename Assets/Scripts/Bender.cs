@@ -6,13 +6,13 @@ public class Bender : MonoBehaviour
 	SteamVR_Controller.Device device;
 	uDesktopDuplication.Texture texture;
 	bool IsGripping, IsPadTouching;
-	void Start ()
-	{
-		device = GetComponent<InputDevice> ().device;
-	}
 	void Update ()
 	{
-		IsPadTouching = device.GetTouch (SteamVR_Controller.ButtonMask.Touchpad);
+        if(device == null)
+        {
+            device = GetComponent<InputDevice>().device;
+        }
+        IsPadTouching = device.GetTouch (SteamVR_Controller.ButtonMask.Touchpad);
 		if (!IsGripping && device.GetTouchDown (SteamVR_Controller.ButtonMask.Trigger) || device.GetPressDown (SteamVR_Controller.ButtonMask.Trigger))
 		{
 			Ray ray = new Ray (transform.position, transform.forward);

@@ -12,6 +12,9 @@ public class ControllerSwitcher : MonoBehaviour
         gripper = GetComponent<Gripper> ();
         scaler = GetComponent<Scaler> ();
         bender = GetComponent<Bender> ();
+        gripper.enabled = true;
+        scaler.enabled = false;
+        bender.enabled = false;
     }
     void Update ()
     {

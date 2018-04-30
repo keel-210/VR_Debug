@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using uDesktopDuplication;
 
 public class GripObjSetter : MonoBehaviour
 {
@@ -10,10 +11,10 @@ public class GripObjSetter : MonoBehaviour
 		foreach (uDesktopDuplication.Texture t in list)
 		{
 			GameObject obj = t.gameObject;
-			obj.AddComponent (typeof (MeshCollider));
+			MeshCollider c = (MeshCollider)obj.AddComponent (typeof (MeshCollider));
+            c.convex = true;
 			Rigidbody r = (Rigidbody) obj.AddComponent (typeof (Rigidbody));
 			r.useGravity = false;
-			r.isKinematic = true;
 			obj.tag = "GripObject";
 		}
 		Destroy (this);
