@@ -3,17 +3,19 @@ using UnityEngine;
 public class Scaler : MonoBehaviour
 {
 	[SerializeField] float ScaleSpeed;
+	LineRenderer line;
 	SteamVR_Controller.Device device;
 	bool IsGripping, IsPadTouching;
 	Transform GrippingTransform;
 	Modes modes;
-	void Start ()
-	{
-		device = GetComponent<InputDevice> ().device;
-		modes = Modes.All;
-	}
 	void Update ()
 	{
+		if (device == null)
+		{
+			device = GetComponent<InputDevice> ().device;
+			line = GetComponent<InputDevice> ().line;
+
+		}
 		IsPadTouching = device.GetTouch (SteamVR_Controller.ButtonMask.Touchpad);
 		if (!IsGripping && device.GetTouchDown (SteamVR_Controller.ButtonMask.Trigger) || device.GetPressDown (SteamVR_Controller.ButtonMask.Trigger))
 		{
@@ -25,6 +27,7 @@ public class Scaler : MonoBehaviour
 				{
 					GrippingTransform = hit.collider.transform;
 					IsGripping = true;
+					line.material = GetComponent<InputDevice> ().RedMaterial;
 				}
 			}
 		}
@@ -73,6 +76,7 @@ public class Scaler : MonoBehaviour
 		{
 			IsGripping = false;
 			GrippingTransform = null;
+			line.material = GetComponent<InputDevice> ().GreenMaterial;
 		}
 	}
 	enum Modes

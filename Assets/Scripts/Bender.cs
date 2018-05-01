@@ -6,13 +6,16 @@ public class Bender : MonoBehaviour
 	SteamVR_Controller.Device device;
 	uDesktopDuplication.Texture texture;
 	bool IsGripping, IsPadTouching;
+	LineRenderer line;
 	void Update ()
 	{
-        if(device == null)
-        {
-            device = GetComponent<InputDevice>().device;
-        }
-        IsPadTouching = device.GetTouch (SteamVR_Controller.ButtonMask.Touchpad);
+		if (device == null)
+		{
+			device = GetComponent<InputDevice> ().device;
+			line = GetComponent<InputDevice> ().line;
+
+		}
+		IsPadTouching = device.GetTouch (SteamVR_Controller.ButtonMask.Touchpad);
 		if (!IsGripping && device.GetTouchDown (SteamVR_Controller.ButtonMask.Trigger) || device.GetPressDown (SteamVR_Controller.ButtonMask.Trigger))
 		{
 			Ray ray = new Ray (transform.position, transform.forward);
@@ -23,6 +26,7 @@ public class Bender : MonoBehaviour
 				{
 					texture = hit.collider.GetComponent<uDesktopDuplication.Texture> ();
 					IsGripping = true;
+					line.material = GetComponent<InputDevice> ().RedMaterial;
 				}
 			}
 		}
@@ -42,6 +46,7 @@ public class Bender : MonoBehaviour
 		{
 			IsGripping = false;
 			texture = null;
+			line.material = GetComponent<InputDevice> ().GreenMaterial;
 		}
 	}
 }
